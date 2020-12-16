@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="EvaluationMapper">
+	
+	<select id="professorlist" parameterType="String" resultType="ProfessorDTO">
+		select * from professor
+		where lecturename = #{lectureName}
+	</select>
+	
+	<select id="selectlectureName" resultType="ProfessorDTO">
+		select distinct lecturename from professor order by lecturename;
+	</select>
+
+	<select id="selectleprofessorname" parameterType="String" resultType="ProfessorDTO">
+		select professorname from professor where lecturename = #{lectureName} 
+	</select>
+
+	<select id="selectone" parameterType="int" resultType="EvaluationDTO">
+		select * from evaluation where evaluationid = #{evaluationid}
+	</select>
+
+	<sql id="search">
+		<if test="key == null">
+			and evaluationtitle like concat('%',#{search},'%')
+		</if>
+		<if test="key != null">
+			and lecturedivide = #{key}
+			and evaluationtitle like concat('%',#{search},'%')
+		</if>
+	</sql>
+	
+	<sql id="searchtype">
+		<if test="searchtype == ''">
+			order by regdate desc
+		</if>
+		<if test="searchtype != ''">
+			order by likecount desc
+		</if>
+	</sql>
+	
+	<sql id="totalcontentsearch">
+		<if test="key == null">
+			where evaluationtitle like concat('%',#{search},'%')
+		</if>
+		<if test="key != null">
+			where lecturedivide = #{key}
+			and evaluationtitle like concat('%',#{search},'%')
+		</if>
+	</sql>
+
+	<insert id="insert" parameterType="EvaluationDTO">
+		insert into evaluation values (
+			null, #{userid}, #{lecturename}, #{professorname}, #{lectureyear}, #{semesterdivide}, 
+			#{lecturedivide}, #{evaluationtitle}, #{evaluationcontent}, #{totalscore}, #{creditscore},
+			#{comfortablescore}, #{lecturescore}, 0, now())
+	</insert>
+	
+	<insert id="addprofessor" parameterType="ProfessorDTO">
+		insert into professor values(#{lecturename}, #{professorname}, 0)
+	</insert>
+	
+	<select id="selectList" parameterType="PageDTO" resultType="EvaluationDTO">
+		select * from (
+			select @rownum:=@rownum+1 as num, e.*  
+			from evaluation as e, (select @rownum:=0) r where 1=1
+			<include refid="search"/>
+			<include refid="searchtype"/>) as e
+		where num between #{startNo} and #{endNo}
+		order by num
+	</select>
+	
+	<select id="selectTotContent" parameterType="PageDTO" resultType="int">
+		select count(*) as totcontent from evaluation
+		<include refid="totalcontentsearch"/>
+	</select>
+	
+	<select id="likeycheck" parameterType="LikeyDTO" resultType="int">
+		select count(*) as cnt from likey
+		where userid = #{userid}
+		and evaluationid= #{evaluationid}
+	</select>
+	
+	<insert id="likeyinsert" parameterType="LikeyDTO">
+		insert into likey values(#{userid}, #{evaluationid}, #{lecturename}, #{professorname}, #{userip})
+	</insert>
+	<update id="likecntup" parameterType="int">
+		update evaluation 
+		set likecount = likecount+1
+		where evaluationid = #{evaluationid}
+	</update>
+	
+	<delete id="likeydelete" parameterType="LikeyDTO">
+		delete from likey 
+		where userid = #{userid} 
+		and evaluationid = #{evaluationid}
+	</delete>
+	<update id="likecntdown" parameterType="int">
+		update evaluation 
+		set likecount = likecount-1
+		where evaluationid = #{evaluationid}
+	</update>
+	
+	<delete id="evaluationdelete" parameterType="int">
+		delete from evaluation
+		where evaluationid = #{evaluationid}
+	</delete>
+	
+	<delete id="deleteprofessor" parameterType="ProfessorDTO">
+		delete from professor
+		where lecturename = #{lecturename}
+		and professorname = #{professorname}
+	</delete>
+	
+	<delete id="deletEvaluationProfessor" parameterType="String">
+		delete from evaluation
+		where professorname = #{professorName}
+	</delete>
+	
+	<delete id="deleteLikeyProfessor" parameterType="String">
+		delete from likey
+		where professorname = #{professorName}
+	</delete>
+	
+	<delete id="deletelikeylecture">
+		delete from likey
+		where lecturename = #{lecturename}
+	</delete>
+	<delete id="deleteevaluationlecture">
+		delete from evaluation
+		where lecturename = #{lecturename}
+	</delete>
+	<delete id="deleteprofessorlecture">
+		delete from professor
+		where lecturename = #{lecturename}
+	</delete>
+	
+	<update id="professorevaluationup" parameterType="EvaluationDTO">
+		update professor
+		set evaluation = evaluation+1
+		where lecturename = #{lecturename}
+		and professorname = #{professorname}
+	</update>
+	
+	<update id="professorevaluationdown" parameterType="EvaluationDTO">
+		update professor
+		set evaluation = evaluation-1
+		where lecturename = #{lecturename}
+		and professorname = #{professorname}
+	</update>
+	
+	
+</mapper>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<!-- 널값 허용 -->
+	<settings>
+		<setting name="jdbcTypeForNull" value="NULL"/>
+	</settings>
+	<typeAliases>
+		<typeAlias type="com.my.DTO.UserDTO" alias="UserDTO"/>
+		<typeAlias type="com.my.DTO.EvaluationDTO" alias="EvaluationDTO"/>
+		<typeAlias type="com.my.DTO.PageDTO" alias="PageDTO"/>
+		<typeAlias type="com.my.DTO.ProfessorDTO" alias="ProfessorDTO"/>
+		<typeAlias type="com.my.DTO.LikeyDTO" alias="LikeyDTO"/>
+	</typeAliases>
+</configuration>
